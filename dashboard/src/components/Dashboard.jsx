@@ -276,7 +276,7 @@ export default function Dashboard() {
   const [orderSort, setOrderSort]   = useState("date");
   const [searchQ, setSearchQ]       = useState("");
   const [darkMode, setDarkMode]     = useState(false);
-  const [notifOpen, setNotifOpen]   = useState(false);
+  const [mobileMenuOpen, setMobileMenu] = useState(false);
   const metrics = DATA[period].metrics;
 
   const filteredOrders = ALL_ORDERS
@@ -304,22 +304,27 @@ export default function Dashboard() {
   return (
     <div className={`app-shell ${darkMode ? "dark" : ""}`}>
 
+      {/* ── Mobile overlay ── */}
+      {mobileMenuOpen && (
+        <div className="mobile-overlay" onClick={() => setMobileMenu(false)} />
+      )}
+
       {/* ── Sidebar ── */}
-      <aside className={`sidebar ${sidebarOpen ? "open" : "collapsed"}`}>
+      <aside className={`sidebar ${sidebarOpen ? "open" : "collapsed"} ${mobileMenuOpen ? "mobile-open" : ""}`}>
         <div className="sidebar-logo">
           <div className="logo-mark">V</div>
-          {sidebarOpen && <span className="logo-text">Vendas Pro</span>}
+          {(sidebarOpen || mobileMenuOpen) && <span className="logo-text">Vendas Pro</span>}
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
               className={`nav-item ${activeNav === item.id ? "active" : ""}`}
-              onClick={() => setActiveNav(item.id)}
+              onClick={() => { setActiveNav(item.id); setMobileMenu(false); }}
               title={!sidebarOpen ? item.label : ""}
             >
               <span className="nav-icon">{item.icon}</span>
-              {sidebarOpen && <span className="nav-label">{item.label}</span>}
+              {(sidebarOpen || mobileMenuOpen) && <span className="nav-label">{item.label}</span>}
             </button>
           ))}
         </nav>
@@ -334,6 +339,7 @@ export default function Dashboard() {
         {/* Top Bar */}
         <header className="topbar">
           <div className="topbar-left">
+            <button className="hamburger" onClick={() => setMobileMenu(v => !v)}>☰</button>
             <h1 className="dash-title">Painel de desempenho</h1>
             <span className="dash-sub">Atualizado agora mesmo · março 2026</span>
           </div>
@@ -357,29 +363,6 @@ export default function Dashboard() {
               ))}
             </div>
             <span className="badge-live">● Ao vivo</span>
-            <div style={{ position: "relative" }}>
-              <button className="icon-btn" onClick={() => setNotifOpen(v=>!v)}>🔔
-                <span className="notif-dot" />
-              </button>
-              {notifOpen && (
-                <div className="notif-panel">
-                  <div className="notif-header">Notificações</div>
-                  {[
-                    { t: "Novo pedido #4522", s: "há 2 min", c: "ok"   },
-                    { t: "Meta 90% atingida", s: "há 1h",    c: "info" },
-                    { t: "Pagamento pendente #4520", s: "há 3h", c: "warn" },
-                  ].map((n,i) => (
-                    <div key={i} className="notif-item">
-                      <span className={`status-dot dot-${n.c}`} />
-                      <div>
-                        <div className="notif-title">{n.t}</div>
-                        <div className="notif-time">{n.s}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
             <button className="icon-btn" onClick={() => setDarkMode(v=>!v)}>
               {darkMode ? "☀️" : "🌙"}
             </button>
@@ -491,9 +474,9 @@ export default function Dashboard() {
                 <table className="orders-table">
                   <thead>
                     <tr>
-                      <th className="th-left">ID</th>
+                      <th className="th-left col-id">ID</th>
                       <th className="th-left">Cliente</th>
-                      <th className="th-left">Categoria</th>
+                      <th className="th-left col-cat">Categoria</th>
                       <th className="th-left">Valor</th>
                       <th className="th-right">Status</th>
                     </tr>
@@ -501,9 +484,9 @@ export default function Dashboard() {
                   <tbody>
                     {filteredOrders.map((o) => (
                       <tr key={o.id} className="order-row">
-                        <td className="td td-id">{o.id}</td>
+                        <td className="td td-id col-id">{o.id}</td>
                         <td className="td">{o.name}</td>
-                        <td className="td">
+                        <td className="td col-cat">
                           <span className="cat-tag">{o.cat}</span>
                         </td>
                         <td className="td td-value">{o.value}</td>
